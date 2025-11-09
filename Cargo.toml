@@ -1,0 +1,10 @@
+[package]
+name = "seckun_rm"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "rm"
+path = "src/main.rs"
+
+[dependencies]
