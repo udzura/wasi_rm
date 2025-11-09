@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::io::{self, Write};
+use std::path::*;
 use std::process;
 
 struct Options {
@@ -52,11 +53,14 @@ fn main() {
     if options.interactive {
         options.force = false;
     }
+
+    let pwd = env::var("PWD").unwrap_or_else(|_| String::from("."));
     
     let mut exit_code = 0;
     
     for file in files {
-        if let Err(e) = remove_file(&file, &options) {
+        let file_path = resolve_path(&file, &pwd);
+        if let Err(e) = remove_file(&file_path, &options) {
             if !options.force {
                 eprintln!("rm: cannot remove '{}': {}", file, e);
                 exit_code = 1;
@@ -75,6 +79,21 @@ fn usage() -> ! {
     eprintln!("  -i    Request confirmation before attempting to remove each file");
     eprintln!("  -v    Be verbose when deleting files, showing them as they are removed");
     process::exit(1);
+}
+
+fn resolve_path(file_path: &str, pwd: &str) -> String {
+    let path = Path::new(file_path);
+    
+    // 絶対パスの場合はそのまま返す
+    if path.is_absolute() {
+        return file_path.to_string();
+    }
+    
+    // 相対パスの場合はPWDと結合
+    let mut full_path = PathBuf::from(pwd);
+    full_path.push(file_path);
+    
+    full_path.to_string_lossy().to_string()
 }
 
 fn remove_file(path: &str, options: &Options) -> io::Result<()> {
