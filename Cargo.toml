@@ -1,5 +1,5 @@
 [package]
-name = "seckun_rm"
+name = "wasi_rm"
 version = "0.1.0"
 edition = "2024"
 
